@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request; // Añadido por el metodo introducido
+use Illuminate\Auth\Events\Registered;             // Añadido por el metodo introducido
+use App\Role;
 
 class RegisterController extends Controller
 {
@@ -28,7 +31,9 @@ class RegisterController extends Controller
      *
      * @var string
      */
+    //modificado para validarse con USERNAME envez de email
     protected $redirectTo = '/home';
+    //protected $redirectTo = '/register';
 
     /**
      * Create a new controller instance.
@@ -48,7 +53,9 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        //modificado para validarse con USERNAME envez de email
         return Validator::make($data, [
+            'username' => 'required|string|max:30|unique:users',
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
@@ -61,12 +68,49 @@ class RegisterController extends Controller
      * @param  array  $data
      * @return \App\User
      */
+
+    // metodo para añadir un Rol por defecto
     protected function create(array $data)
     {
+        $user = User::create([
+            'username' => $data['username'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ]);
+
+        $user
+            ->roles()
+            ->attach(Role::where('name', 'user')->first());
+
+        return $user;
+    }
+    /*
+    protected function create(array $data)
+    {
+        //modificado para validarse con USERNAME envez de email
         return User::create([
+            'username' => $data['username'],
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
     }
+    */
+// Añadimos este metodo para sobreescribir el metodo de vendor y no auto-loguee tras registrarse
+    public function register(Request $request)
+        {
+            $this->validator($request->all())->validate();
+
+            event(new Registered($user = $this->create($request->all())));
+
+            // Para que no autologuee
+            //$this->guard()->login($user); 
+
+
+            return $this->registered($request, $user)
+                            ?: redirect($this->redirectPath());
+        }
+
 }

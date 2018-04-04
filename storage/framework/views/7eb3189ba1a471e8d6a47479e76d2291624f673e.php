@@ -10,14 +10,14 @@
                         <?php echo csrf_field(); ?>
 
                         <div class="form-group row">
-                            <label for="email" class="col-sm-4 col-form-label text-md-right"><?php echo e(__('E-Mail Address')); ?></label>
+                            <label for="username" class="col-sm-4 col-form-label text-md-right"><?php echo e(__('Nombre de Usuario')); ?></label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control<?php echo e($errors->has('email') ? ' is-invalid' : ''); ?>" name="email" value="<?php echo e(old('email')); ?>" required autofocus>
+                                <input id="username" type="text" class="form-control<?php echo e($errors->has('username') ? ' is-invalid' : ''); ?>" name="username" value="<?php echo e(old('username')); ?>" required autofocus>
 
-                                <?php if($errors->has('email')): ?>
+                                <?php if($errors->has('username')): ?>
                                     <span class="invalid-feedback">
-                                        <strong><?php echo e($errors->first('email')); ?></strong>
+                                        <strong><?php echo e($errors->first('username')); ?></strong>
                                     </span>
                                 <?php endif; ?>
                             </div>
